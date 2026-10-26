@@ -1,0 +1,452 @@
+{
+  "info": {
+    "name": "Cricketer API - CRUD Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "cricketerId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. CREATE - valid cricketer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201 Created\", () => pm.response.to.have.status(201));",
+              "const j = pm.response.json();",
+              "pm.test(\"Response contains created data + id\", () => { pm.expect(j._id).to.exist; pm.expect(j.name).to.eql(\"Babar Azam\"); });",
+              "pm.collectionVariables.set(\"cricketerId\", j._id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Babar Azam\",\n  \"jerseyNo\": 56,\n  \"team\": \"Pakistan\",\n  \"role\": \"Batsman\",\n  \"matches\": 120\n}"
+        }
+      }
+    },
+    {
+      "name": "2. READ ALL",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200 OK\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Body is a non-empty JSON array\", () => { const j = pm.response.json(); pm.expect(j).to.be.an('array'); pm.expect(j.length).to.be.above(0); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. READ ONE by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200 OK\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Correct record returned\", () => pm.expect(pm.response.json()._id).to.eql(pm.collectionVariables.get(\"cricketerId\")));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers/{{cricketerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers",
+            "{{cricketerId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. UPDATE - matches 120 -> 125",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200 OK\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Record updated\", () => pm.expect(pm.response.json().matches).to.eql(125));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers/{{cricketerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers",
+            "{{cricketerId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Babar Azam\",\n  \"jerseyNo\": 56,\n  \"team\": \"Pakistan\",\n  \"role\": \"Batsman\",\n  \"matches\": 125\n}"
+        }
+      }
+    },
+    {
+      "name": "5. ERROR - missing required fields",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400 Bad Request\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Validation details returned\", () => pm.expect(pm.response.json().details).to.be.an('array'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"No Team\"\n}"
+        }
+      }
+    },
+    {
+      "name": "6. ERROR - invalid data types",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400 Bad Request\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"X\",\n  \"jerseyNo\": \"abc\",\n  \"team\": \"Y\",\n  \"role\": \"Singer\",\n  \"matches\": -5\n}"
+        }
+      }
+    },
+    {
+      "name": "7. ERROR - duplicate jerseyNo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 409 Conflict\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Babar Azam\",\n  \"jerseyNo\": 56,\n  \"team\": \"Pakistan\",\n  \"role\": \"Batsman\",\n  \"matches\": 120\n}"
+        }
+      }
+    },
+    {
+      "name": "8. ERROR - GET nonexistent ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404 Not Found\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers/64b7f0f0f0f0f0f0f0f0f0f0",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers",
+            "64b7f0f0f0f0f0f0f0f0f0f0"
+          ]
+        }
+      }
+    },
+    {
+      "name": "9. ERROR - PUT nonexistent ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404 Not Found\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers/64b7f0f0f0f0f0f0f0f0f0f0",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers",
+            "64b7f0f0f0f0f0f0f0f0f0f0"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Babar Azam\",\n  \"jerseyNo\": 56,\n  \"team\": \"Pakistan\",\n  \"role\": \"Batsman\",\n  \"matches\": 120\n}"
+        }
+      }
+    },
+    {
+      "name": "10. ERROR - invalid ID format",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400 Bad Request\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers/abc",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers",
+            "abc"
+          ]
+        }
+      }
+    },
+    {
+      "name": "11. DELETE existing record",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200 OK\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers/{{cricketerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers",
+            "{{cricketerId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "12. VERIFY - deleted record returns 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404 Not Found\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/cricketers/{{cricketerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cricketers",
+            "{{cricketerId}}"
+          ]
+        }
+      }
+    }
+  ]
+}
